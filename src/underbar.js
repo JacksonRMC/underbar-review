@@ -349,7 +349,21 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
-    var memCache = {};
+    var argumentsCache = [];
+    var resultsCache = [];
+
+    return function() {
+      if (argumentsCache.includes(JSON.stringify(arguments)) === true){
+        return resultsCache[argumentsCache.indexOf(JSON.stringify(arguments))];
+      }
+    else{
+      var output = func.apply(this,arguments);
+      argumentsCache.push(JSON.stringify(arguments));
+      resultsCache.push(output);
+      return output;
+    }
+
+    }
 
   };
 
