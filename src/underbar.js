@@ -165,23 +165,32 @@
     var sum = 0;
     var i = 0;
     //debugger
-    if(accumulator !== undefined){
-       sum = accumulator;
-     
-    } else {
-      sum = collection[0];
-      i =1;
-    }
-    
-    for (i ;i < collection.length; i++){
-      sum = iterator(sum, collection[i]);
-      // if (sum == undefined){
-      //   return accumulator;
-      // }
-    }
-   
-    return sum;
+     if(Array.isArray(collection)){ 
+      if(accumulator !== undefined){
+         sum = accumulator;
+       
+      } else {
+        sum = collection[0];
+        i =1;
+      }
+      for (i ;i < collection.length; i++){
+        sum = iterator(sum, collection[i]);
+      }
+      return sum;
 
+    } else {
+        if(accumulator !== undefined){
+         sum = accumulator;
+       
+        } else {
+          sum = obj[Object.values(obj)[0]]; 
+          i = obj[Object.keys(obj)[1]];      
+        }
+      for (var property in collection){
+        sum = iterator(sum, collection[property]);
+        }
+     return sum;    
+    }
   
     //applies each element against an accumulator
 
@@ -207,13 +216,55 @@
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
-    // TIP: Try re-using reduce() here.
+    return _.reduce(collection, function(wasFound, item) {
+      if (wasFound) {
+        if(iterator){
+          return iterator(item) ? true : false;
+        }
+        else{
+          return item ? true : false;
+        }
+      }
+      else{
+        return false;
+      }
+    }, true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    // var arrayOfBooleans = [];
+    // if (collection){
+    //   _.every(collection, function(wasFound, item){
+    //     arrayOfBooleans.push(iterator(item));
+        
+    //   });
+    //   return arrayOfBooleans.includes(true);
+    // }
+    // else if (collection === []){
+    //   return false;
+    // }
+    var bool = false;
+    if (iterator){
+      for(var i = 0; i < collection.length; i++){
+       if(iterator(collection[i]) == true || (collection[i] && typeof(collection[i]) === 'string')){
+        bool = true;
+        return bool;
+       }
+      }
+    }
+    else{
+      for(var i = 0; i < collection.length; i++){
+        if(collection[i] == true){
+        bool = true;
+        return bool;
+        }
+      }
+    }
+   
+    return bool;
   };
 
 
@@ -236,11 +287,25 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    for (var property in arguments){
+      for(var other in arguments[property]){
+        obj[other] =  arguments[property][other];
+      }
+    }
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    for (var property in arguments){
+      for(var other in arguments[property]){
+        if (obj.hasOwnProperty(other) === false){
+          obj[other] =  arguments[property][other];
+        }
+      }
+    }
+    return obj;
   };
 
 
@@ -284,7 +349,8 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
-    
+    var memCache = {};
+
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -294,6 +360,13 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    var arg1 = arguments[2];
+    var arg2 = arguments[3];
+    setTimeout(
+      function(){
+        return func.call(null, arg1, arg2);
+      }
+  , wait);
   };
 
 
@@ -308,6 +381,16 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    var newArray = [];
+    var copy = array.slice();
+
+    for (var i = copy.length; i > 0; i--){
+      var shuffle = Math.floor(Math.random() * i);
+      newArray.push(copy[shuffle]);
+      copy.splice(shuffle, 1);
+    }
+
+    return newArray;
   };
 
 
